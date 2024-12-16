@@ -9,15 +9,30 @@ use Illuminate\Support\Facades\Storage;
 class DiseaseController extends Controller
 {
     public function home($category_id = 0){
-        if($category_id == 0) $diseases = Disease::paginate(8);
-        else $diseases = Disease::where('category_id', $category_id)->paginate(8);
+        $keyword = request()->query('search', '');
+        // dd($keyword);
+        if($category_id != 0) $diseases = Disease::where('category_id', $category_id)->paginate(8);
+        else if($keyword != ""){
+            $diseases = Disease::where('name', 'LIKE', "%".$keyword."%")
+            ->orWhere('description', 'LIKE', "%$keyword%")
+            ->orWhere('symptoms', 'LIKE', "%$keyword%")
+            ->orWhere('cause', 'LIKE', "%$keyword%")
+            ->orWhere('treatment', 'LIKE', "%$keyword%")
+            ->paginate(8)
+            ->appends(['search' => $keyword]);
+
+            // dd($keyword);
+        }
+        else $diseases = Disease::paginate(8);
+
+        // dd($diseases);
+
         $categories = Category::all();
-
-
         return view('home', ['categories'=>$categories, 'diseases'=>$diseases]);
     }
 
     public function detail(Disease $disease){
+        //related data form the same category but not the same id
         $related = Disease::where('category_id', $disease->category->id)->where('id', '!=', $disease->id)->get();
 
         return view('disease-details', [
@@ -45,6 +60,7 @@ class DiseaseController extends Controller
     }
 
     public function delete($id){
+        // find id
         $disease = Disease::findOrFail($id);
         $disease->delete();
 
@@ -121,31 +137,4 @@ class DiseaseController extends Controller
         return redirect()->route('disease')->with('success', 'Disease added successfully');
     }
 
-    // public function search(Request $request){
-    //     $keyword = $request->input('keyword');
-    //     $diseases = Disease::where('name', 'LIKE', "%$keyword%")->paginate(8);
-    //     $categories = Category::all();
-    //         return view('home', [
-    //             'categories' => $categories,
-    //             'diseases' => $diseases,
-    //             'keyword' => $keyword 
-    //         ]);
-    // }
-    public function search(Request $request){
-        $keyword = $request->input('keyword');
-        $categories = Category::all();
-        
-        $diseases = Disease::where('name', 'LIKE', "%$keyword%")
-            ->orWhere('description', 'LIKE', "%$keyword%")
-            ->orWhere('symptoms', 'LIKE', "%$keyword%")
-            ->orWhere('cause', 'LIKE', "%$keyword%")
-            ->orWhere('treatment', 'LIKE', "%$keyword%")
-            ->paginate(8);
-        
-        return view('home', [
-            'categories' => $categories,
-            'diseases' => $diseases,
-            'keyword' => $keyword 
-        ]);
-    }
 }

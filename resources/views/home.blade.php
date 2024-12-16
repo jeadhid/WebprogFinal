@@ -10,8 +10,8 @@
 
     <div class="row mb-4">
         <div class="col-md-6">
-            <form action="{{ route('search') }}" method="GET" class="d-flex">
-                <input type="text" name="keyword" class="form-control" placeholder="Search diseases..." value="{{ $keyword ?? '' }}">
+            <form action="{{ route('disease') }}" method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control" placeholder="Search diseases..." value="{{ request('search') ?? '' }}">
                 <button type="submit" class="btn btn-primary ms-2">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
@@ -36,12 +36,12 @@
 
         @foreach ($diseases as $item)
             <div class="col">
-                <div class="card h-100">
-                    <img src="{{ asset('storage/diseases/'.$item->photo) }}" class="card-img-top" alt="Disease image">
+                <div class="card h-100 overflow-hidden">
+                    <img src="{{ asset('storage/diseases/'.$item->photo) }}" class="card-img-top" alt="Disease image" style="height: 200px; object-fit: cover">
                     <div class="card-body">
                         <h5 class="card-title">{{$item->name}}</h5>
                         <span class="" style="color: rgb(27, 47, 136)">
-                            {{$item->category->name}}
+                            {{$item->category->name}}   
                         </span>
                         <p class="card-text text-muted">
                             {{$item->description}}
